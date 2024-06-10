@@ -81,9 +81,6 @@ RUN composer self-update 2.5.8
 # Add Config
 COPY .zshrc /root
 COPY vim/.vimrc /root
-COPY ssh /root/.ssh
-RUN if [ -f ~/.ssh/id_rsa ]; then chmod 600 ~/.ssh/id_rsa; fi
-RUN if [ -f ~/.ssh/id_rsa.pub ]; then chmod 600 ~/.ssh/id_rsa.pub; fi
 COPY php.ini /usr/local/etc/php/
 COPY php-composer.ini /usr/local/etc/php/
 
