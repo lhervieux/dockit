@@ -3,6 +3,7 @@
 clean()
 {
   clear
+  rm -f docker-compose.yaml
   rm -rf ./docker/nginx/conf.d/sites-enabled/*
   rm -rf ./app/*
   sed -i '/DOCKER_PREFIX             =/d' ./Makefile
@@ -39,8 +40,8 @@ apply_project()
   SF_VERSION=$3
   MARIA_DB_PORT=$4
 
-  mkdir ./docker/nginx/conf.d/sites-enabled/$PROJECT_SLUGGED
-  mkdir ./app/$PROJECT_SLUGGED
+  mkdir -p ./docker/nginx/conf.d/sites-enabled/$PROJECT_SLUGGED
+  mkdir -p ./app/$PROJECT_SLUGGED
   cp ./docker/nginx/conf.d/back.conf ./docker/nginx/conf.d/sites-enabled/$PROJECT_SLUGGED
 
   sed -i -e "s/domain_name/www.$PROJECT_SLUGGED.localhost/g" docker/nginx/conf.d/sites-enabled/$PROJECT_SLUGGED/back.conf

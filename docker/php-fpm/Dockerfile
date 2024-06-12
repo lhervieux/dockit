@@ -124,11 +124,7 @@ RUN usermod -u 1000 www-data
 
 # Fix time shift problem
 RUN rm /etc/localtime \
-    && ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime
-
-# Supervisor
-#RUN apt-get install -y --no-install-recommends supervisor \
-#    && mkdir -p /var/log/supervisord
+    && ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime \
 
 # Xdebug - disabled by default
 ARG XDEBUG_VERSION=3.2.2
@@ -139,5 +135,3 @@ RUN set -eux; \
 RUN mkdir /usr/local/etc/php/conf.d.disabled
 RUN mv /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d.disabled/docker-php-ext-xdebug.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d.disabled/
-
-#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
