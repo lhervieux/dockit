@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./docker_functions.sh
+. ./bash/docker_functions.sh
 
 clean
 

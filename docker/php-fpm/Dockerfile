@@ -1,5 +1,26 @@
 FROM php:8.2-fpm AS base
 
+ARG USERNAME=dockit-guy
+ARG USER_UID=1001
+ARG USER_GID=$USER_UID
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    #
+    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# ********************************************************
+# * Anything else you want to do like clean up goes here *
+# ********************************************************
+
+# [Optional] Set the default user. Omit if you want to keep the default as root.
+#USER $USERNAME
+
 # Install Packages
 RUN apt-get update -y --fix-missing \
     && apt-get install -y --no-install-recommends build-essential \
@@ -81,6 +102,8 @@ RUN composer self-update 2.5.8
 # Add Config
 COPY .zshrc /root
 COPY vim/.vimrc /root
+COPY .zshrc /$USERNAME
+COPY vim/.vimrc /$USERNAME
 COPY php.ini /usr/local/etc/php/
 COPY php-composer.ini /usr/local/etc/php/
 
@@ -123,12 +146,8 @@ RUN apt-get install -y --no-install-recommends libssh2-1-dev libssh2-1 \
 RUN usermod -u 1000 www-data
 
 # Fix time shift problem
-RUN rm /etc/localtime \
-    && ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime
-
-# Supervisor
-#RUN apt-get install -y --no-install-recommends supervisor \
-#    && mkdir -p /var/log/supervisord
+#RUN rm /etc/localtime \
+#    && ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime \
 
 # Xdebug - disabled by default
 ARG XDEBUG_VERSION=3.2.2
@@ -140,4 +159,4 @@ RUN mkdir /usr/local/etc/php/conf.d.disabled
 RUN mv /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d.disabled/docker-php-ext-xdebug.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d.disabled/
 
-#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+

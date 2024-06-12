@@ -1,7 +1,7 @@
 #
 # PARAMETERS
 #
-
+UID = $(shell id -u)
 DOCKER_COMPOSE            = docker compose
 DOCKER                    = docker
 DOCKER_PREFIX             = dockit-
@@ -33,9 +33,11 @@ help:
 ## ———————————————————————————————————— 🤘 DOCK-IT! 🤘 —————————————————————————————————————————————————————————
 create: ## Create your project
 	$(MAKE) rm
-	bash docker.sh
+	bash bash/docker.sh
 	$(MAKE) build
 	$(MAKE) install_symfony
+	$(MAKE) chmod
+	$(MAKE) chown
 	$(MAKE) info
 
 check_project: ## Do project created
@@ -48,7 +50,7 @@ info:
 	@echo "\033[0;32mNom du projet créé: $(PROJECT_NAME)"
 	@echo "Url: http://www.$(PROJECT_NAME).localhost:"
 ifeq ($(HAS_DB), 1)
-	@echo "Url DB: mysql://root:root@$(DOCKER_PREFIX)-db-1:/$(PROJECT_NAME)"
+	@echo "Url DB: mysql://root:root@$(DOCKER_PREFIX)-db-1:y/$(PROJECT_NAME)"
 endif
 	@echo "\033[0m"
 
@@ -123,7 +125,7 @@ install_symfony: ## WWW - Install Symfony project
 ifeq ($(HAS_DB), 1)
 	$(EXEC_WWW_PHP_TTY) "$(COMPOSER) require symfony/orm-pack"
 endif
-	sudo chown -R $(USER) app/$(PROJECT_NAME)
+	#sudo chown -R $(USER) app/$(PROJECT_NAME)
 
 cache_clear: ## WWW - Clear cache
 	@$(MAKE) check_project
@@ -135,4 +137,12 @@ cache_warmup: ## WWW - Warmup cache
 
 cli: ## WWW - Access docker cli
 	@$(MAKE) check_project
-	$(EXEC_WWW_PHP_TTY) "stty columns `tput cols`; stty rows `tput lines`; exec zsh;"
+	@$(EXEC_WWW_PHP_TTY) "stty columns `tput cols`; stty rows `tput lines`; exec zsh;"
+
+chmod: ## Sets cache and log folders rights
+	-$(EXEC_WWW_PHP_TTY) "chmod 777 -R var/cache/"
+	-$(EXEC_WWW_PHP_TTY) "chmod 777 -R var/log/"
+	-$(EXEC_WWW_PHP_TTY) "chmod 777 -R vendor/"
+
+chown: ## Sets cache and log folders rights
+	@-$(EXEC_WWW_PHP_TTY) "chown $(UID) -R *"
